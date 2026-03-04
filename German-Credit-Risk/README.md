@@ -1,5 +1,7 @@
 # German Credit Risk Analysis & Prediction
 
+> **[View Live Demo](https://natpaphonnn.github.io/German_Risk/)** — Interactive portfolio website (TH/EN)
+
 ## Overview
 
 โปรเจกต์นี้เป็นการวิเคราะห์ความเสี่ยงด้านสินเชื่อ (Credit Risk) จากชุดข้อมูล **German Credit Dataset** ซึ่งประกอบด้วยข้อมูลผู้กู้ 1,000 ราย โดยมีเป้าหมายในการ **ทำนายว่าผู้กู้จะมีความเสี่ยงดี (good) หรือ ไม่ดี (bad)** เพื่อช่วยธนาคารตัดสินใจอนุมัติสินเชื่อ
@@ -69,6 +71,16 @@
 4. **Age** คนอายุน้อยเสี่ยงกว่าคนอายุมาก
 5. โมเดล Random Forest ให้ผลดีที่สุดด้วย AUC 0.779
 
+## Live Website
+
+Portfolio website ที่สรุปทั้งโปรเจกต์ในหน้าเดียว:
+
+**https://natpaphonnn.github.io/German_Risk/**
+
+- รองรับ 2 ภาษา (ไทย / English)
+- อธิบาย Dataset, Methodology, Results, Insights
+- Dark theme (เขียว/ดำ/เงิน) พร้อม animation
+
 ## Project Structure
 
 ```
@@ -77,11 +89,9 @@ German-Credit-Risk/
 │   └── main.ipynb          # Jupyter notebook (EDA → Modeling → Evaluation)
 ├── models/
 │   └── best_model.pkl      # Trained model + scaler + encoders
-├── src/
-│   └── main.py             # Python pipeline script
-├── requirements.txt
 ├── setup.py
 └── README.md
+index.html                  # Portfolio website (GitHub Pages)
 ```
 
 ## Installation
