@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German Credit Risk Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1a1a2e;
+            line-height: 1.7;
+            background: #fafbfc;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e8e8e8;
+            padding: 0.8rem 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        nav .logo { font-weight: 700; font-size: 1.1rem; color: #1a1a2e; }
+        nav .nav-links a {
+            text-decoration: none; color: #555; margin-left: 1.5rem;
+            font-size: 0.9rem; transition: color 0.2s;
+        }
+        nav .nav-links a:hover { color: #4a90d9; }
+
+        /* --- Sections --- */
+        section { padding: 5rem 2rem; max-width: 1000px; margin: 0 auto; }
+
+        /* --- Hero --- */
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            max-width: 100%; padding-top: 4rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
+        .hero p { font-size: 1.15rem; max-width: 600px; opacity: 0.9; margin-bottom: 2rem; }
+        .hero-stats {
+            display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap;
+            justify-content: center;
+        }
+        .hero-stat {
+            background: rgba(255,255,255,0.15); border-radius: 12px;
+            padding: 1.2rem 2rem; min-width: 140px;
+            backdrop-filter: blur(5px);
+        }
+        .hero-stat .value { font-size: 2rem; font-weight: 800; }
+        .hero-stat .label { font-size: 0.8rem; opacity: 0.8; margin-top: 0.2rem; }
+        .scroll-hint {
+            margin-top: 3rem; opacity: 0.6; font-size: 0.85rem;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+
+        /* --- Section headers --- */
+        .section-header {
+            text-align: center; margin-bottom: 3rem;
+        }
+        .section-header h2 {
+            font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;
+        }
+        .section-header p { color: #666; font-size: 1rem; }
+        .section-tag {
+            display: inline-block; background: #eef2ff; color: #4a56c9;
+            padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.8rem;
+            font-weight: 600; margin-bottom: 0.8rem; letter-spacing: 0.5px;
+        }
+
+        /* --- Cards grid --- */
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: white; border-radius: 12px; padding: 1.8rem;
+            border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .card-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: #1a1a2e; }
+        .card p { font-size: 0.9rem; color: #666; }
+
+        /* --- Pipeline --- */
+        .pipeline {
+            display: flex; justify-content: center; align-items: center;
+            flex-wrap: wrap; gap: 0.5rem; margin-bottom: 3rem;
+        }
+        .pipeline-step {
+            background: white; border: 2px solid #e0e0e0; border-radius: 10px;
+            padding: 1rem 1.5rem; text-align: center; min-width: 150px;
+            transition: all 0.2s;
+        }
+        .pipeline-step:hover { border-color: #4a90d9; background: #f0f5ff; }
+        .pipeline-step .step-num {
+            font-size: 0.7rem; font-weight: 700; color: #4a90d9;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .pipeline-step .step-name { font-weight: 600; font-size: 0.95rem; margin-top: 0.3rem; }
+        .pipeline-arrow { font-size: 1.2rem; color: #ccc; }
+
+        /* --- Model Table --- */
+        .model-table {
+            width: 100%; border-collapse: collapse; margin-top: 1.5rem;
+            background: white; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .model-table th {
+            background: #1a1a2e; color: white; padding: 1rem 1.5rem;
+            text-align: left; font-size: 0.85rem; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .model-table td {
+            padding: 1rem 1.5rem; border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95rem;
+        }
+        .model-table tr:hover { background: #f8f9ff; }
+        .model-table tr:last-child td { border-bottom: none; }
+        .badge-best {
+            background: #d4edda; color: #155724; padding: 0.2rem 0.7rem;
+            border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+        }
+
+        /* --- AUC bar --- */
+        .auc-bar-bg {
+            width: 100%; height: 8px; background: #eee; border-radius: 4px;
+            margin-top: 0.4rem;
+        }
+        .auc-bar {
+            height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        /* --- Insight box --- */
+        .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .insight-box {
+            background: white; border-left: 4px solid #667eea;
+            padding: 1.5rem; border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+        .insight-box .insight-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+        .insight-box .insight-stat {
+            font-size: 1.8rem; font-weight: 800; color: #764ba2; margin-bottom: 0.3rem;
+        }
+        .insight-box .insight-desc { font-size: 0.85rem; color: #666; }
+
+        /* --- Feature list --- */
+        .feature-list {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-top: 1.5rem;
+        }
+        .feature-item {
+            display: flex; align-items: center; gap: 0.8rem;
+            background: white; padding: 0.8rem 1.2rem; border-radius: 8px;
+            border: 1px solid #eee; font-size: 0.9rem;
+        }
+        .feature-item .feat-rank {
+            background: #eef2ff; color: #4a56c9; width: 28px; height: 28px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center; padding: 3rem 2rem;
+            background: #1a1a2e; color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+        }
+        footer a { color: #667eea; text-decoration: none; }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 1rem; }
+            .pipeline { flex-direction: column; }
+            .pipeline-arrow { transform: rotate(90deg); }
+            nav .nav-links a { margin-left: 0.8rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+    <div class="logo">German Credit Risk</div>
+    <div class="nav-links">
+        <a href="#about">Dataset</a>
+        <a href="#methodology">Methodology</a>
+        <a href="#results">Results</a>
+        <a href="#insights">Insights</a>
+        <a href="https://github.com/Natpaphonnn/German_Risk" target="_blank">GitHub</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <h1>German Credit Risk Analysis</h1>
+    <p>Machine Learning project to predict credit risk from borrower data — helping banks make smarter lending decisions</p>
+
+    <div class="hero-stats">
+        <div class="hero-stat">
+            <div class="value">1,000</div>
+            <div class="label">Borrowers</div>
+        </div>
+        <div class="hero-stat">
+            <div class="value">12</div>
+            <div class="label">Features</div>
+        </div>
+        <div class="hero-stat">
+            <div class="value">5</div>
+            <div class="label">ML Models</div>
+        </div>
+        <div class="hero-stat">
+            <div class="value">0.779</div>
+            <div class="label">Best AUC</div>
+        </div>
+    </div>
+
+    <div class="scroll-hint">Scroll down to explore the project</div>
+</section>
+
+<!-- About Dataset -->
+<section id="about">
+    <div class="section-header">
+        <span class="section-tag">DATASET</span>
+        <h2>About the Data</h2>
+        <p>German Credit Dataset from a bank in Germany — 1,000 borrower records</p>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🎯</div>
+            <h3>Objective</h3>
+            <p>Classify borrowers as <strong>"Good"</strong> (low risk) or <strong>"Bad"</strong> (high risk) based on their financial and personal information.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">📊</div>
+            <h3>Class Distribution</h3>
+            <p><strong>70% Good</strong> vs <strong>30% Bad</strong> — the dataset is imbalanced, so we used SMOTE to handle this during model training.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">❓</div>
+            <h3>Missing Values</h3>
+            <p><strong>Saving Account (18.3%)</strong> and <strong>Checking Account (39.4%)</strong> had missing values — filled with "unknown" as a meaningful category.</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 2.5rem;">
+        <h3 style="margin-bottom: 1rem; text-align: center;">Features Used</h3>
+        <div class="feature-list">
+            <div class="feature-item"><span class="feat-rank">1</span> Age</div>
+            <div class="feature-item"><span class="feat-rank">2</span> Sex</div>
+            <div class="feature-item"><span class="feat-rank">3</span> Job Level</div>
+            <div class="feature-item"><span class="feat-rank">4</span> Housing</div>
+            <div class="feature-item"><span class="feat-rank">5</span> Saving Account</div>
+            <div class="feature-item"><span class="feat-rank">6</span> Checking Account</div>
+            <div class="feature-item"><span class="feat-rank">7</span> Credit Amount</div>
+            <div class="feature-item"><span class="feat-rank">8</span> Duration</div>
+            <div class="feature-item"><span class="feat-rank">9</span> Purpose</div>
+            <div class="feature-item"><span class="feat-rank">+1</span> Monthly Payment *</div>
+            <div class="feature-item"><span class="feat-rank">+2</span> Age Group *</div>
+            <div class="feature-item"><span class="feat-rank">+3</span> Credit per Age *</div>
+        </div>
+        <p style="text-align: center; font-size: 0.8rem; color: #999; margin-top: 0.8rem;">* Engineered features created during Feature Engineering phase</p>
+    </div>
+</section>
+
+<!-- Methodology -->
+<section id="methodology" style="background: #f0f2f5;">
+    <div class="section-header">
+        <span class="section-tag">METHODOLOGY</span>
+        <h2>How We Built It</h2>
+        <p>End-to-end ML pipeline from raw data to trained model</p>
+    </div>
+
+    <div class="pipeline">
+        <div class="pipeline-step">
+            <div class="step-num">Phase 1</div>
+            <div class="step-name">EDA</div>
+        </div>
+        <span class="pipeline-arrow">&#8594;</span>
+        <div class="pipeline-step">
+            <div class="step-num">Phase 2</div>
+            <div class="step-name">Feature Engineering</div>
+        </div>
+        <span class="pipeline-arrow">&#8594;</span>
+        <div class="pipeline-step">
+            <div class="step-num">Phase 3</div>
+            <div class="step-name">Modeling</div>
+        </div>
+        <span class="pipeline-arrow">&#8594;</span>
+        <div class="pipeline-step">
+            <div class="step-num">Phase 4</div>
+            <div class="step-name">Evaluation</div>
+        </div>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🔍</div>
+            <h3>Phase 1 — EDA</h3>
+            <p>Explored distributions, correlations, and relationships. Discovered that missing checking account data strongly correlates with high risk.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🛠️</div>
+            <h3>Phase 2 — Feature Engineering</h3>
+            <p>Created 3 new features: <strong>Monthly Payment</strong> (credit/duration), <strong>Age Group</strong> (Young/Adult/Senior), and <strong>Credit per Age</strong>. Encoded categoricals with LabelEncoder and scaled with StandardScaler.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🤖</div>
+            <h3>Phase 3 — Modeling</h3>
+            <p>Trained 5 models: Logistic Regression, Random Forest, SVM, Gradient Boosting, XGBoost. Applied <strong>SMOTE</strong> for class imbalance and <strong>GridSearchCV</strong> for hyperparameter tuning.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">📈</div>
+            <h3>Phase 4 — Evaluation</h3>
+            <p>Evaluated with ROC-AUC, Confusion Matrix, PR Curve, Feature Importance, and <strong>SHAP values</strong> for model explainability.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Results -->
+<section id="results">
+    <div class="section-header">
+        <span class="section-tag">RESULTS</span>
+        <h2>Model Performance</h2>
+        <p>Compared 5 models using ROC-AUC score (higher is better, 1.0 = perfect, 0.5 = random)</p>
+    </div>
+
+    <table class="model-table">
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>ROC-AUC</th>
+                <th>Accuracy</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Random Forest</strong></td>
+                <td>
+                    <strong>0.779</strong>
+                    <div class="auc-bar-bg"><div class="auc-bar" style="width: 92%;"></div></div>
+                </td>
+                <td>73.5%</td>
+                <td><span class="badge-best">Best Model</span></td>
+            </tr>
+            <tr>
+                <td>Logistic Regression</td>
+                <td>
+                    0.771
+                    <div class="auc-bar-bg"><div class="auc-bar" style="width: 89%;"></div></div>
+                </td>
+                <td>74.5%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>SVM</td>
+                <td>
+                    0.767
+                    <div class="auc-bar-bg"><div class="auc-bar" style="width: 87.5%;"></div></div>
+                </td>
+                <td>77.5%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>XGBoost</td>
+                <td>
+                    0.750
+                    <div class="auc-bar-bg"><div class="auc-bar" style="width: 82%;"></div></div>
+                </td>
+                <td>74.0%</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Gradient Boosting</td>
+                <td>
+                    0.745
+                    <div class="auc-bar-bg"><div class="auc-bar" style="width: 80%;"></div></div>
+                </td>
+                <td>75.5%</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Top Feature Importance (SHAP)</h3>
+        <div class="feature-list">
+            <div class="feature-item"><span class="feat-rank">1</span> <strong>Checking Account</strong></div>
+            <div class="feature-item"><span class="feat-rank">2</span> <strong>Credit Amount</strong></div>
+            <div class="feature-item"><span class="feat-rank">3</span> <strong>Duration</strong></div>
+            <div class="feature-item"><span class="feat-rank">4</span> <strong>Age</strong></div>
+            <div class="feature-item"><span class="feat-rank">5</span> <strong>Saving Account</strong></div>
+        </div>
+    </div>
+</section>
+
+<!-- Insights -->
+<section id="insights" style="background: #f0f2f5;">
+    <div class="section-header">
+        <span class="section-tag">INSIGHTS</span>
+        <h2>Key Findings</h2>
+        <p>What the data and model tell us about credit risk</p>
+    </div>
+
+    <div class="insight-grid">
+        <div class="insight-box">
+            <div class="insight-stat">88%</div>
+            <div class="insight-title">Unknown Checking Account = Highest Risk</div>
+            <div class="insight-desc">Borrowers with no checking account data have an 88% bad rate — the strongest risk signal in the entire dataset.</div>
+        </div>
+        <div class="insight-box" style="border-left-color: #e74c3c;">
+            <div class="insight-stat">58%</div>
+            <div class="insight-title">Young Borrowers (Age ≤ 25)</div>
+            <div class="insight-desc">The youngest age group has a 58% bad rate, more than double the 25% rate of senior borrowers (age 46+).</div>
+        </div>
+        <div class="insight-box" style="border-left-color: #f39c12;">
+            <div class="insight-stat">Higher</div>
+            <div class="insight-title">Large Loans = More Risk</div>
+            <div class="insight-desc">The "bad" group has a significantly higher median credit amount than the "good" group. Higher loan amounts correlate with higher default risk.</div>
+        </div>
+        <div class="insight-box" style="border-left-color: #27ae60;">
+            <div class="insight-stat">6-8 mo</div>
+            <div class="insight-title">Longer Duration = More Risk</div>
+            <div class="insight-desc">Bad borrowers have an average loan duration 6-8 months longer than good borrowers. Longer repayment periods indicate higher risk.</div>
+        </div>
+    </div>
+</section>
+
+<!-- Conclusion -->
+<section>
+    <div class="section-header">
+        <span class="section-tag">CONCLUSION</span>
+        <h2>What This Model Can Do</h2>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🎯</div>
+            <h3>Screen High-Risk Borrowers</h3>
+            <p>Automatically flag risky applicants before loan approval, reducing potential losses from bad debt.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">⚡</div>
+            <h3>Faster Decisions</h3>
+            <p>Data-driven decisions instead of guesswork — process applications faster with consistent criteria.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🔍</div>
+            <h3>Explainable with SHAP</h3>
+            <p>Every prediction can be explained — know exactly which factors contributed to the risk assessment.</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: #f8f9fa; border-radius: 12px;">
+        <p style="color: #666; font-size: 0.95rem;">
+            <strong>Limitations:</strong> Dataset contains only 1,000 records. AUC of 0.779 is good but has room for improvement.
+            Should be validated on real-world data before production use.
+        </p>
+    </div>
+</section>
+
+<!-- Tools Used -->
+<section style="background: #f0f2f5;">
+    <div class="section-header">
+        <span class="section-tag">TECH STACK</span>
+        <h2>Tools & Libraries</h2>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center;">
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">Python</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">Pandas</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">NumPy</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">Scikit-learn</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">XGBoost</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">SHAP</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">Matplotlib</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">Seaborn</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">SMOTE</span>
+        <span style="background: white; padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid #e0e0e0; font-size: 0.9rem;">Jupyter Notebook</span>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <p>German Credit Risk Analysis &mdash; Machine Learning Portfolio Project</p>
+    <p style="margin-top: 0.5rem;">
+        <a href="https://github.com/Natpaphonnn/German_Risk" target="_blank">View on GitHub</a>
+    </p>
+</footer>
+
+</body>
+</html>
