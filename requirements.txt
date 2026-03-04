@@ -1,11 +1,6 @@
 numpy
 pandas
 scikit-learn
-matplotlib
-seaborn
 joblib
 streamlit
 plotly
-xgboost
-imbalanced-learn
-shap
