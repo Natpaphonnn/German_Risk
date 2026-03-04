@@ -4,5 +4,8 @@ scikit-learn
 matplotlib
 seaborn
 joblib
-jupyter
-pytest
+streamlit
+plotly
+xgboost
+imbalanced-learn
+shap

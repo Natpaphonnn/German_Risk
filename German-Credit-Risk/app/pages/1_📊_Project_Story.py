@@ -11,7 +11,7 @@ st.set_page_config(page_title="Project Story", page_icon="📊", layout="wide")
 @st.cache_data
 def load_data():
     # Try multiple paths
-    for path in ["../../german_credit_data.csv", "../german_credit_data.csv", "german_credit_data.csv"]:
+    for path in ["../data/german_credit_data.csv", "../../german_credit_data.csv", "../german_credit_data.csv", "german_credit_data.csv"]:
         full = os.path.join(os.path.dirname(__file__), path)
         if os.path.exists(full):
             df = pd.read_csv(full)

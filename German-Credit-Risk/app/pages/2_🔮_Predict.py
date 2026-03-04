@@ -9,9 +9,12 @@ st.set_page_config(page_title="Predict Risk", page_icon="🔮", layout="wide")
 # --- Load model ---
 @st.cache_resource
 def load_model():
-    model_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "best_model.pkl")
-    if os.path.exists(model_path):
-        return joblib.load(model_path)
+    for path in [
+        os.path.join(os.path.dirname(__file__), "..", "..", "models", "best_model.pkl"),
+        os.path.join(os.path.dirname(__file__), "..", "models", "best_model.pkl"),
+    ]:
+        if os.path.exists(path):
+            return joblib.load(path)
     return None
 
 model_data = load_model()
